@@ -4,6 +4,7 @@ import Cliente.Cliente;
 import Cliente.ColaClientes;
 import Arbol.ArbolProductos;
 import Grafo.Grafo; // NUEVA IMPORTACIÓN
+import Helpers.ResultadoDijkstra;
 import Producto.Producto;
 import Nodo.Nodo;
 
@@ -21,25 +22,8 @@ public class Tienda {
         this.inventario = new ArbolProductos();
         this.colaAtencion = new ColaClientes();
         this.mapa = new Grafo(); // Inicialización
-        this.ubicacion = "Sede Central"; // Vértice de origen predeterminado
-        precargarMapa(); // Llama a la precarga de datos solicitada
-    }
-
-    /**
-     * Genera un conjunto inicial de vértices y aristas para tener un mapa funcional
-     * desde que arranca la aplicación.
-     */
-    private void precargarMapa() {
-        mapa.insertarVertice(this.ubicacion);
-
-        // Insertamos rutas predeterminadas (Aristas ponderadas)
-        mapa.insertarArista(this.ubicacion, "Punto A", 5.5);
-        mapa.insertarArista(this.ubicacion, "Punto B", 12.0);
-        mapa.insertarArista("Punto A", "Punto C", 3.2);
-        mapa.insertarArista("Punto B", "Punto C", 7.4);
-        mapa.insertarArista("Punto C", "Punto D", 2.1);
-
-        System.out.println("[*] Mapa básico de rutas precargado exitosamente en la Tienda.");
+        this.ubicacion = "Tienda Central (Tibás)"; // Vértice de origen predeterminado
+        this.mapa.precargarMapaInicial(); // Llama a la precarga de datos solicitada
     }
 
     public ArbolProductos getInventario() {
@@ -63,11 +47,24 @@ public class Tienda {
      * de su ListaProductos (carrito) e imprime la factura.
      */
     public void atenderSiguienteCliente() {
-        Cliente clienteActual = colaAtencion.desencolar();
+        // 1. Consultar el frente de la cola sin desencolar
+        Cliente clienteActual = colaAtencion.verFrente();
 
         if (clienteActual == null) {
-            return; // El método desencolar() avisa si está vacía
+            System.out.println("\n[INFO] La cola de atención está vacía.");
+            return;
         }
+
+        // 2. Validación de conectividad (nodo aislado)
+        if (!validarConectividadCliente(clienteActual)) {
+            return; // Cancela el procesamiento y el cliente PERMANECE en la cola
+        }
+
+        // 3. Si la validación pasa, se desencola y se procesa la compra
+        colaAtencion.desencolar();
+
+        // 4. Cálculo del camino más corto con Dijkstra
+        ResultadoDijkstra resultadoRuta = mapa.calcularCaminoMasCorto(this.ubicacion, clienteActual.getUbicacion());
 
         System.out.println("\n=======================================");
         System.out.println("          FACTURA DE COMPRA            ");
@@ -98,5 +95,25 @@ public class Tienda {
         System.out.println("---------------------------------------");
         System.out.printf("COSTO TOTAL ACUMULADO : $%.2f\n", totalAcumulado);
         System.out.println("=======================================\n");
+    }
+
+    /**
+     * Verifica si la ubicación del cliente se encuentra conectada con la tienda.
+     * Si está aislada, muestra la alerta en consola y retorna false.
+     */
+    private boolean validarConectividadCliente(Cliente cliente) {
+        if (!mapa.estaConectado(this.ubicacion, cliente.getUbicacion())) {
+            System.out.println("\n=======================================================");
+            System.out.println("  [ALERTA DE ENVÍO] OPERACIÓN CANCELADA");
+            System.out.println("=======================================================");
+            System.out.println("Cliente: " + cliente.getNombre() + " " + cliente.getPrimerApellido());
+            System.out.println("Ubicación de entrega: " + cliente.getUbicacion());
+            System.out.println("Motivo: La ubicación se encuentra DESCONECTADA de la tienda.");
+            System.out.println("Sugerencia: Conecte el nodo agregando aristas desde el menú.");
+            System.out.println("=======================================================\n");
+            return false;
+        }
+
+        return true;
     }
 }

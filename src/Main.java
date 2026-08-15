@@ -2,7 +2,9 @@ import Cliente.Cliente;
 import Producto.Producto;
 import Tienda.Tienda;
 
+import java.util.ArrayList;
 import java.util.InputMismatchException;
+import java.util.List;
 import java.util.Scanner;
 
 /**
@@ -78,9 +80,8 @@ public class Main {
         System.out.print("Correo: "); String correo = scanner.nextLine();
         System.out.print("Teléfono: "); String telefono = scanner.nextLine();
 
-        // NUEVA SOLICITUD DE DATOS
-        System.out.print("Ubicación en el mapa (Ej. Punto A, Punto B): ");
-        String ubicacion = scanner.nextLine();
+        // SELECCIÓN DE UBICACIÓN DESDE MAPA PRECARGADO
+        String ubicacion = seleccionarUbicacion(scanner, tienda);
 
         int prioridad = 0;
         while (prioridad < 1 || prioridad > 3) {
@@ -88,7 +89,6 @@ public class Main {
             if (prioridad < 1 || prioridad > 3) System.out.println("[!] La prioridad debe ser un entero entre 1 y 3.");
         }
 
-        // CONSTRUCTOR ACTUALIZADO
         Cliente nuevoCliente = new Cliente(id, nombre, ap1, ap2, correo, telefono, prioridad, ubicacion);
 
         System.out.println("\n-- LLENADO DEL CARRITO DESDE EL INVENTARIO --");
@@ -112,8 +112,39 @@ public class Main {
             }
         }
 
-        tienda.getColaAtencion().encolar(nuevoCliente);
+        // Se encola registrando la ubicación en el mapa
+        tienda.getColaAtencion().encolar(nuevoCliente, tienda.getMapa());
         System.out.println("[+] Cliente ingresado a la Cola de Prioridad exitosamente.");
+    }
+
+    /**
+     * Muestra las ubicaciones disponibles en el Grafo y fuerza al usuario
+     * a seleccionar una mediante su índice numérico.
+     */
+    private static String seleccionarUbicacion(Scanner scanner, Tienda tienda) {
+        List<String> ubicaciones = new ArrayList<>(tienda.getMapa().getAdyacencia().keySet());
+
+        if (ubicaciones.isEmpty()) {
+            System.out.println("[!] No hay ubicaciones registradas en el mapa.");
+            return "Desconocido";
+        }
+
+        System.out.println("\n--- SELECCIÓN DE UBICACIÓN DE ENTREGA ---");
+        for (int i = 0; i < ubicaciones.size(); i++) {
+            System.out.printf(" %2d. %s\n", (i + 1), ubicaciones.get(i));
+        }
+
+        int seleccion = 0;
+        while (seleccion < 1 || seleccion > ubicaciones.size()) {
+            seleccion = leerEnteroSeguro(scanner, "Seleccione el número de su ubicación (1-" + ubicaciones.size() + "): ");
+            if (seleccion < 1 || seleccion > ubicaciones.size()) {
+                System.out.println("[!] Opción fuera de rango. Por favor elija un número de la lista.");
+            }
+        }
+
+        String ubicacionSeleccionada = ubicaciones.get(seleccion - 1);
+        System.out.println("[✓] Ubicación seleccionada: " + ubicacionSeleccionada);
+        return ubicacionSeleccionada;
     }
 
     // --- MÉTODOS DE VALIDACIÓN DE ENTRADA ---

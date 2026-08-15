@@ -1,5 +1,7 @@
 package Cliente;
 
+import Grafo.Grafo;
+
 import java.util.ArrayList;
 
 /**
@@ -20,9 +22,14 @@ public class ColaClientes {
         return clientes.isEmpty();
     }
 
-    public void encolar(Cliente cliente) {
+    public void encolar(Cliente cliente, Grafo grafo) {
         if (cliente == null) {
             return;
+        }
+
+        // Registro automático de la ubicación en el grafo (Fase 2)
+        if (grafo != null && cliente.getUbicacion() != null) {
+            grafo.insertarVertice(cliente.getUbicacion());
         }
 
         // Si la cola está vacía, simplemente se agrega al inicio
@@ -31,7 +38,7 @@ public class ColaClientes {
             return;
         }
 
-        // Sino esta vacia, buscamos la posición correcta de inserción
+        // Si no está vacía, buscamos la posición correcta de inserción
         int posicion = 0;
         while (posicion < clientes.size()) {
             // Si la prioridad del cliente nuevo es MAYOR que la del cliente en la posición actual,
