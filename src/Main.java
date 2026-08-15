@@ -78,13 +78,18 @@ public class Main {
         System.out.print("Correo: "); String correo = scanner.nextLine();
         System.out.print("Teléfono: "); String telefono = scanner.nextLine();
 
+        // NUEVA SOLICITUD DE DATOS
+        System.out.print("Ubicación en el mapa (Ej. Punto A, Punto B): ");
+        String ubicacion = scanner.nextLine();
+
         int prioridad = 0;
         while (prioridad < 1 || prioridad > 3) {
             prioridad = leerEnteroSeguro(scanner, "Prioridad asignada (1-Básico, 2-Afiliado, 3-Premium): ");
             if (prioridad < 1 || prioridad > 3) System.out.println("[!] La prioridad debe ser un entero entre 1 y 3.");
         }
 
-        Cliente nuevoCliente = new Cliente(id, nombre, ap1, ap2, correo, telefono, prioridad);
+        // CONSTRUCTOR ACTUALIZADO
+        Cliente nuevoCliente = new Cliente(id, nombre, ap1, ap2, correo, telefono, prioridad, ubicacion);
 
         System.out.println("\n-- LLENADO DEL CARRITO DESDE EL INVENTARIO --");
         tienda.getInventario().listarProductos();

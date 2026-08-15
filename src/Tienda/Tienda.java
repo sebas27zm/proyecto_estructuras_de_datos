@@ -3,20 +3,43 @@ package Tienda;
 import Cliente.Cliente;
 import Cliente.ColaClientes;
 import Arbol.ArbolProductos;
+import Grafo.Grafo; // NUEVA IMPORTACIÓN
 import Producto.Producto;
-import Nodo.Nodo; // Asegúrate de importar el Nodo que maneja la ListaProductos de tu compañero
+import Nodo.Nodo;
 
 /**
- * Clase que gestiona la integración entre el inventario (BST) y la cola de prioridad.
- * Cumple con los requerimientos de la consigna para el control del sistema.
+ * Clase que gestiona la integración entre el inventario (BST), la cola de prioridad
+ * y el mapa de ubicaciones (Grafo).
  */
 public class Tienda {
     private ArbolProductos inventario;
     private ColaClientes colaAtencion;
+    private Grafo mapa; // NUEVO
+    private String ubicacion; // NUEVO: Ubicación física de la Tienda
 
     public Tienda() {
         this.inventario = new ArbolProductos();
         this.colaAtencion = new ColaClientes();
+        this.mapa = new Grafo(); // Inicialización
+        this.ubicacion = "Sede Central"; // Vértice de origen predeterminado
+        precargarMapa(); // Llama a la precarga de datos solicitada
+    }
+
+    /**
+     * Genera un conjunto inicial de vértices y aristas para tener un mapa funcional
+     * desde que arranca la aplicación.
+     */
+    private void precargarMapa() {
+        mapa.insertarVertice(this.ubicacion);
+
+        // Insertamos rutas predeterminadas (Aristas ponderadas)
+        mapa.insertarArista(this.ubicacion, "Punto A", 5.5);
+        mapa.insertarArista(this.ubicacion, "Punto B", 12.0);
+        mapa.insertarArista("Punto A", "Punto C", 3.2);
+        mapa.insertarArista("Punto B", "Punto C", 7.4);
+        mapa.insertarArista("Punto C", "Punto D", 2.1);
+
+        System.out.println("[*] Mapa básico de rutas precargado exitosamente en la Tienda.");
     }
 
     public ArbolProductos getInventario() {
@@ -27,6 +50,14 @@ public class Tienda {
         return colaAtencion;
     }
 
+    public Grafo getMapa() {
+        return mapa;
+    }
+
+    public String getUbicacion() {
+        return ubicacion;
+    }
+
     /**
      * Atiende al cliente con mayor prioridad en la cola, calcula el costo total
      * de su ListaProductos (carrito) e imprime la factura.
@@ -35,13 +66,14 @@ public class Tienda {
         Cliente clienteActual = colaAtencion.desencolar();
 
         if (clienteActual == null) {
-            return; // El método desencolar() de tu compañero ya avisa si está vacía
+            return; // El método desencolar() avisa si está vacía
         }
 
         System.out.println("\n=======================================");
         System.out.println("          FACTURA DE COMPRA            ");
         System.out.println("=======================================");
         System.out.println("Cliente: " + clienteActual.getNombre() + " " + clienteActual.getPrimerApellido());
+        System.out.println("Ubicación de entrega: " + clienteActual.getUbicacion());
         System.out.println("Prioridad: " + clienteActual.getPrioridad() + " (" + clienteActual.getTipoPrioridadString() + ")");
         System.out.println("---------------------------------------");
         System.out.println("Detalle de productos:");
