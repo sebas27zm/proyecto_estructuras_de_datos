@@ -73,6 +73,10 @@ public class Tienda {
         System.out.println("Ubicación de entrega: " + clienteActual.getUbicacion());
         System.out.println("Prioridad: " + clienteActual.getPrioridad() + " (" + clienteActual.getTipoPrioridadString() + ")");
         System.out.println("---------------------------------------");
+        System.out.println("Ruta óptima de entrega (Dijkstra):");
+        System.out.println("  " + String.join(" -> ", resultadoRuta.getRuta()));
+        System.out.printf("  Distancia total: %.2f km\n", resultadoRuta.getDistanciaTotal());
+        System.out.println("---------------------------------------");
         System.out.println("Detalle de productos:");
 
         double totalAcumulado = 0.0;

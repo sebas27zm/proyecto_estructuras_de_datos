@@ -18,6 +18,10 @@ public class Main {
         menu(miTienda);
     }
 
+    /**
+     * Muestra el menú principal en consola y despacha cada opción del usuario
+     * hacia el método correspondiente hasta que se seleccione "Salir".
+     */
     public static void menu(Tienda tienda) {
         Scanner scanner = new Scanner(System.in);
         int opcion = 0;
@@ -31,7 +35,9 @@ public class Main {
             System.out.println("1. Insertar Producto al Inventario (Árbol BST)");
             System.out.println("2. Registrar Cliente y llenar Carrito");
             System.out.println("3. Atender siguiente Cliente (Generar Factura)");
-            System.out.println("4. Salir");
+            System.out.println("4. Insertar Vértice al Mapa (Grafo)");
+            System.out.println("5. Insertar Arista (Conexión) al Mapa (Grafo)");
+            System.out.println("6. Salir");
 
             opcion = leerEnteroSeguro(scanner, "Seleccione una opción: ");
 
@@ -46,12 +52,18 @@ public class Main {
                     tienda.atenderSiguienteCliente();
                     break;
                 case 4:
+                    insertarVerticeManual(scanner, tienda);
+                    break;
+                case 5:
+                    insertarAristaManual(scanner, tienda);
+                    break;
+                case 6:
                     System.out.println("\nCerrando el sistema... ¡Ejecución finalizada con éxito!");
                     break;
                 default:
-                    System.out.println("\n[!] Opción inválida. Seleccione un número del 1 al 4.");
+                    System.out.println("\n[!] Opción inválida. Seleccione un número del 1 al 6.");
             }
-        } while (opcion != 4);
+        } while (opcion != 6);
 
         scanner.close();
     }
@@ -71,6 +83,10 @@ public class Main {
         System.out.println("[+] Producto insertado correctamente en el árbol.");
     }
 
+    /**
+     * Registra un nuevo cliente (datos personales, ubicación y carrito de compras)
+     * y lo encola en la Cola de Prioridad de atención.
+     */
     private static void registrarCliente(Scanner scanner, Tienda tienda) {
         System.out.println("\n-- REGISTRAR CLIENTE EN LA COLA --");
         System.out.print("ID del cliente: "); String id = scanner.nextLine();
@@ -118,6 +134,62 @@ public class Main {
     }
 
     /**
+     * Permite al usuario insertar manualmente un nuevo vértice (ubicación) al Grafo.
+     */
+    private static void insertarVerticeManual(Scanner scanner, Tienda tienda) {
+        System.out.println("\n-- INSERTAR VÉRTICE AL MAPA --");
+        System.out.print("Nombre de la nueva ubicación: ");
+        String nombre = scanner.nextLine();
+
+        if (nombre == null || nombre.isBlank()) {
+            System.out.println("[!] El nombre no puede estar vacío.");
+            return;
+        }
+
+        boolean yaExistia = tienda.getMapa().getAdyacencia().containsKey(nombre);
+        tienda.getMapa().insertarVertice(nombre);
+
+        if (yaExistia) {
+            System.out.println("[i] La ubicación '" + nombre + "' ya existía en el mapa.");
+        } else {
+            System.out.println("[+] Vértice '" + nombre + "' agregado correctamente al mapa.");
+        }
+    }
+
+    /**
+     * Permite al usuario insertar manualmente una nueva arista (conexión) entre
+     * dos ubicaciones del Grafo, indicando la distancia entre ellas.
+     */
+    private static void insertarAristaManual(Scanner scanner, Tienda tienda) {
+        System.out.println("\n-- INSERTAR ARISTA (CONEXIÓN) AL MAPA --");
+
+        List<String> ubicaciones = new ArrayList<>(tienda.getMapa().getAdyacencia().keySet());
+        if (!ubicaciones.isEmpty()) {
+            System.out.println("Ubicaciones actuales en el mapa:");
+            for (String u : ubicaciones) {
+                System.out.println("  - " + u);
+            }
+        } else {
+            System.out.println("[i] El mapa aún no tiene ubicaciones registradas.");
+        }
+
+        System.out.print("\nUbicación de origen: ");
+        String origen = scanner.nextLine();
+        System.out.print("Ubicación de destino: ");
+        String destino = scanner.nextLine();
+
+        if (origen.isBlank() || destino.isBlank()) {
+            System.out.println("[!] Origen y destino no pueden estar vacíos.");
+            return;
+        }
+
+        double peso = leerDoubleSeguro(scanner, "Distancia entre ambas ubicaciones (km): ");
+
+        tienda.getMapa().insertarArista(origen, destino, peso);
+        System.out.println("[+] Conexión creada: " + origen + " <-> " + destino + " (" + peso + " km).");
+    }
+
+    /**
      * Muestra las ubicaciones disponibles en el Grafo y fuerza al usuario
      * a seleccionar una mediante su índice numérico.
      */
@@ -148,6 +220,10 @@ public class Main {
     }
 
     // --- MÉTODOS DE VALIDACIÓN DE ENTRADA ---
+
+    /**
+     * Solicita un entero por consola, repitiendo la petición si la entrada no es válida.
+     */
     private static int leerEnteroSeguro(Scanner scanner, String mensaje) {
         while (true) {
             System.out.print(mensaje);
@@ -162,6 +238,10 @@ public class Main {
         }
     }
 
+    /**
+     * Solicita un número decimal no negativo por consola, repitiendo la petición
+     * si la entrada no es válida.
+     */
     private static double leerDoubleSeguro(Scanner scanner, String mensaje) {
         while (true) {
             System.out.print(mensaje);
